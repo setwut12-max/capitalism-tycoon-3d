@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CAPITALISM TYCOON 3D</title>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<style>
+:root{--blue:#1e4fd8;--gold:#f5b800;--green:#10b981;--orange:#ff8a00;--sky:#8fd3ff;--w:#fff;--ink:#1b2a4a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--sky);font-family:'Kanit','Sarabun',system-ui,sans-serif;color:var(--ink)}
+#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
+.scr,#hud,#load{position:fixed;inset:0;display:none}
+#load{display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(#1e4fd8,#5ab0ff);color:#fff;z-index:50;text-align:center}
+.bar{width:260px;height:14px;background:#fff3;border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s}
+.panel{background:var(--w);border-radius:18px;box-shadow:0 8px 28px #0003;padding:14px}
+.b{background:linear-gradient(#ffb340,var(--orange));color:#fff;border:0;border-radius:14px;padding:9px 14px;font:600 15px inherit;font-family:inherit;cursor:pointer;box-shadow:0 3px 0 #c76500;margin:3px}
+.b:active{transform:translateY(2px);box-shadow:none}.b.g{background:linear-gradient(#34d399,var(--green));box-shadow:0 3px 0 #0a7a57}.b.bl{background:linear-gradient(#5b8bff,var(--blue));box-shadow:0 3px 0 #123a9a}.b[disabled]{opacity:.5}
+#intro{align-items:center;justify-content:flex-start;flex-direction:column;padding-top:8vh;text-align:center;color:#fff;text-shadow:0 3px 10px #0007}
+#intro h1{font-size:clamp(28px,7vw,64px);margin:0;color:var(--gold);-webkit-text-stroke:2px #1e4fd8}
+#intro .btns{display:flex;flex-direction:column;width:min(260px,80vw);margin-top:3vh}
+#setup{align-items:center;padding:12px}#setup .panel{width:min(340px,94vw);max-height:92vh;overflow:auto}
+#setup input,#setup select{width:100%;padding:8px;border-radius:10px;border:2px solid #cfe0ff;font:inherit;margin:3px 0 8px}
+.chs button{width:23%;font-size:11px;padding:6px 2px}.chs .on{outline:3px solid var(--gold)}
+#hud{pointer-events:none}#hud *{pointer-events:auto}
+#top{position:absolute;top:calc(6px + env(safe-area-inset-top,0px));left:6px;right:6px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+#top span{background:#fffe;border-radius:12px;padding:4px 10px;font-size:13px;font-weight:600;box-shadow:0 2px 8px #0002}
+#left{position:absolute;left:6px;top:70px;display:flex;flex-direction:column}#left .b{padding:8px 10px;font-size:13px;text-align:left}
+#right{position:absolute;right:6px;top:70px;width:220px;font-size:13px}
+#bot{position:absolute;left:0;right:0;bottom:calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;flex-wrap:wrap}
+@media(max-width:760px){#right{display:none}#left{top:96px}#left .b{font-size:12px;padding:6px 8px}#bot .b{font-size:12px;padding:7px 8px}}
+#modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:30;padding:10px}
+#mb{background:#fff;border-radius:20px;padding:16px;max-width:760px;width:100%;max-height:88vh;overflow:auto;position:relative;box-shadow:0 10px 40px #0006}
+#mb h2{margin:0 0 8px;color:var(--blue)}.x{position:absolute;right:10px;top:8px;border:0;background:#eee;border-radius:50%;width:30px;height:30px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}.card{border:2px solid #dbe7ff;border-radius:14px;padding:10px;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:4px;border-bottom:1px solid #eef}
+#toast{position:fixed;left:50%;top:18%;transform:translateX(-50%);z-index:40;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+#toast div{background:var(--blue);color:#fff;padding:8px 16px;border-radius:14px;animation:up 3s forwards;box-shadow:0 4px 14px #0004}
+@keyframes up{0%{opacity:0;transform:translateY(20px)}10%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0;transform:translateY(-30px)}}
+.cube{font-size:70px;text-align:center;animation:spin 4s linear infinite;transform-style:preserve-3d;filter:drop-shadow(0 12px 6px #0003)}@keyframes spin{to{transform:rotateY(360deg)}}
+.pb{height:8px;background:#e5eefc;border-radius:5px;overflow:hidden}.pb i{display:block;height:100%;background:var(--green)}
+</style></head><body>
+<canvas id="c"></canvas>
+<div id="load"><h1>CAPITALISM TYCOON 3D</h1><div class="bar"><i id="lb"></i></div><p id="lt">กำลังโหลด…</p></div>
+<div id="intro" class="scr"><div><h1>CAPITALISM TYCOON 3D</h1><div style="font-size:clamp(14px,3vw,22px)">มหานครทุนนิยม : นักธุรกิจพิชิตเศรษฐกิจ</div><div style="color:var(--gold);font-weight:700">BUILD YOUR BUSINESS, CONTROL YOUR MARKET!</div></div>
+<div class="btns"><button class="b" onclick="newGame()">▶ START GAME</button><button class="b g" id="cont" onclick="contGame()" style="display:none">⏩ CONTINUE</button><button class="b bl" onclick="howTo()">HOW TO PLAY</button><button class="b bl" onclick="objs()">LEARNING OBJECTIVES</button><button class="b bl" onclick="about()">ABOUT GAME</button></div></div>
+<div id="setup" class="scr"><div class="panel"><h2 style="margin:0">ตั้งค่าผู้เล่น</h2>
+<label>ชื่อผู้เล่น</label><input id="pn" maxlength="14" value="CEO น้อย">
+<label>ตัวละคร</label><div class="chs" id="chs"></div>
+<label>รูปแบบ</label><select id="pg"><option value="0">ชาย</option><option value="1">หญิง</option></select>
+<label>อาชีพ (ลดค่าสร้างธุรกิจประเภทนั้น 10%)</label><select id="pj"></select>
+<label>ระดับความยาก</label><select id="pd"><option value="0">ง่าย</option><option value="1" selected>ปานกลาง</option><option value="2">ยาก</option></select>
+<p>💰 เงินทุนเริ่มต้น 10,000 COINS<br><small>ลากเพื่อหมุนดูตัวละคร 360°</small></p><button class="b" onclick="confirmSetup()">เริ่มบริหารเมือง!</button></div></div>
+<div id="hud"><div id="top"></div>
+<div id="left"><button class="b bl" onclick="missions()">🎯 Mission</button><button class="b bl" onclick="bizPanel()">🏗️ Business</button><button class="b bl" onclick="market('info')">🛒 Market</button><button class="b bl" onclick="invest()">📈 Investment</button><button class="b bl" onclick="know()">📚 Knowledge</button><button class="b bl" onclick="news()">📰 News</button></div>
+<div id="right" class="panel"><b id="rn"></b><div id="rl"></div><hr><b>🎯 ภารกิจ</b><div id="rm"></div><hr><b>📰 ข่าว</b><div id="rw"></div><hr><button class="b" onclick="settings()">⚙ ตั้งค่า</button></div>
+<div id="bot"><button class="b g" onclick="bizPanel()">🏗️ สร้างธุรกิจ</button><button class="b" onclick="market('buy')">🛒 ซื้อ</button><button class="b" onclick="market('sell')">💰 ขาย</button><button class="b bl" onclick="market('info')">📊 ตลาด</button><button class="b bl" onclick="zoom(-6)">➕</button><button class="b bl" onclick="zoom(6)">➖</button><button class="b bl" onclick="rot()">⟳</button><button class="b g" onclick="finalCh()">🏁 ภารกิจสุดท้าย</button></div></div>
+<div id="modal"><div id="mb"></div></div><div id="toast"></div>
+<script>
+const $=i=>document.getElementById(i),T=window.THREE,R=Math.random,fmt=n=>Math.round(n).toLocaleString('th-TH'),cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+// ---------- DATA ----------
+const B=[['โรงงานอุตสาหกรรม','🏭',3000,30,4,35,55,20,0xe67e22],['ร้านอาหาร','🍜',2000,18,3,30,35,25,0xe74c3c],['ค้าปลีก','🏪',1500,15,2,30,25,30,0x3498db],['เกษตรกรรม','🌾',1000,8,2,25,22,20,0x27ae60],['เทคโนโลยี','💻',4000,60,4,60,150,10,0x8e44ad]]; // ชื่อ,ไอคอน,ทุน,วัตถุดิบ/หน่วย,แรงงาน,ค่าจ้าง,ราคาขาย,ผลิต/วัน,สี
+const G0=[['ข้าว','🍚',20],['น้ำตาล','🍬',15],['เสื้อผ้า','👕',60],['โทรศัพท์มือถือ','📱',300],['รถยนต์','🚗',900],['น้ำมัน','🛢️',40],['อาหาร','🍱',30],['วัตถุดิบอุตสาหกรรม','⚙️',25]];
+const CH=[['Young CEO',0x1e4fd8,0x222222],['Factory Mgr',0xe67e22,0x5a3a1a],['Investor',0x10b981,0x8a5a2b],['Shop Owner',0xf5b800,0x111111]];
+const LV=['BEGINNER','ENTREPRENEUR','BUSINESS OWNER','INVESTOR','TYCOON MASTER'],LX=[0,150,400,800,1300];
+const INV=[['ลงทุนในโรงงาน',2000,.3,.15,5],['ลงทุนในธุรกิจ',2500,.35,.2,6],['ซื้อเครื่องจักร',1500,.25,.1,4],['ขยายกิจการ',3000,.4,.25,7],['เพิ่มกำลังการผลิต',2000,.28,.12,5]];
+const N=[['ความต้องการสินค้าเพิ่มขึ้น',-1,25,0,'อุปสงค์เพิ่ม → ราคาสินค้าสูงขึ้น'],['ราคาวัตถุดิบปรับตัวสูงขึ้น',7,0,-30,'อุปทานลด → ราคาสูงขึ้น ต้นทุนผลิตเพิ่ม'],['บริษัทคู่แข่งเปิดกิจการใหม่',2,0,25,'อุปทานเพิ่ม → ราคาลดลง การแข่งขันสูงขึ้น'],['ผู้บริโภคมีรายได้เพิ่มขึ้น',-1,20,0,'กำลังซื้อเพิ่ม → ยอดขายดีขึ้น'],['รัฐออกมาตรการควบคุมราคาน้ำมัน',5,0,15,'รัฐแทรกแซงตลาดเพื่อลดผลกระทบต่อประชาชน']];
+const C=[['เงินเฟ้อ','ราคาสินค้าทั่วไปสูงขึ้น กำลังซื้อประชาชนลดลง',[['ปรับราคาขึ้นพอเหมาะตามต้นทุน',300,-2,5,1,'เหมาะสม: ปรับตามต้นทุนจริงช่วยรักษากำไรโดยไม่เอาเปรียบผู้บริโภค'],['ขึ้นราคาสูงเกินควรเพื่อทำกำไร',800,-12,-15,0,'ไม่เหมาะสม: ฉวยโอกาสทำให้ผู้บริโภคเดือดร้อนและเสียความเชื่อมั่น'],['ลดคุณภาพสินค้าเพื่อคงราคา',200,-8,-10,0,'ไม่เหมาะสม: ลดคุณภาพโดยไม่แจ้งเป็นการเอาเปรียบผู้บริโภค']]],
+['ราคาน้ำมันเพิ่มขึ้น','ต้นทุนการขนส่งและการผลิตสูงขึ้นทั่วเมือง',[['ลงทุนระบบประหยัดพลังงาน',-500,3,5,1,'เหมาะสม: ลงทุนลดต้นทุนระยะยาวและเพิ่มประสิทธิภาพ'],['รอดูสถานการณ์ ไม่ทำอะไร',-200,-2,0,0,'ไม่เหมาะสม: ต้นทุนสูงต่อเนื่อง กำไรลดลง'],['ปลดพนักงานครึ่งหนึ่ง',400,-15,-8,0,'ไม่เหมาะสม: คนว่างงานเพิ่ม กำลังซื้อและความพึงพอใจลดลง']]],
+['สินค้าล้นตลาด','อุปทานมากกว่าอุปสงค์ ราคาสินค้าตกต่ำ',[['ลดราคาและจัดโปรโมชัน',-100,6,3,1,'เหมาะสม: ราคาลดตามกลไกตลาดช่วยระบายสินค้าและผู้บริโภคได้ประโยชน์'],['กักตุนสินค้ารอราคาขึ้น',-400,-3,-3,0,'ไม่เหมาะสม: เสียค่าเก็บรักษา ขณะที่อุปทานยังล้น'],['ลดกำลังผลิตและหาตลาดใหม่',100,2,5,1,'เหมาะสม: ปรับการผลิตให้สมดุลกับความต้องการ']]],
+['การว่างงานเพิ่มขึ้น','แรงงานในเมืองตกงานมากขึ้น',[['จ้างงานเพิ่มและฝึกทักษะ',-600,12,8,1,'เหมาะสม: เพิ่มผลผลิตและกำลังซื้อในระยะยาว'],['ลดค่าจ้างแรงงาน',300,-12,-6,0,'ไม่เหมาะสม: ลดกำลังซื้อและแรงจูงใจในการทำงาน'],['ไม่ทำอะไร',0,-4,0,0,'ไม่เหมาะสม: ปัญหาสังคมสะสมและตลาดหดตัว']]],
+['การแข่งขันตัดราคา','คู่แข่งลดราคาลงมาก ลูกค้าเริ่มย้ายร้าน',[['พัฒนาสินค้าให้แตกต่าง (นวัตกรรม)',-700,5,6,1,'เหมาะสม: การแข่งขันที่ดีกระตุ้นนวัตกรรมและประสิทธิภาพ'],['ตัดราคาแข่งจนกำไรหาย',-300,0,0,0,'ไม่เหมาะสม: สงครามราคาทำให้ทุกฝ่ายขาดทุน'],['ตกลงราคากับคู่แข่ง (ฮั้ว)',500,-8,-20,0,'ไม่เหมาะสม: ผิดกฎหมายแข่งขันทางการค้าและเป็นการผูกขาด รัฐต้องเข้ากำกับดูแล']]]];
+const K=[['ความหมายของทุนนิยม','🏙️','ระบบเศรษฐกิจที่เอกชนเป็นเจ้าของปัจจัยการผลิต และใช้กลไกตลาดตัดสินว่าจะผลิตอะไร อย่างไร และเพื่อใคร'],['กรรมสิทธิ์ในทรัพย์สินส่วนบุคคล','🏠','เอกชนมีสิทธิ์ถือครอง ใช้ ขาย และรับผลประโยชน์จากทรัพย์สิน เช่น ที่ดิน โรงงาน เครื่องจักร โดยกฎหมายคุ้มครอง'],['เสรีภาพในการประกอบอาชีพ','🧑‍💼','บุคคลเลือกอาชีพและเปิดกิจการได้เองภายใต้กฎหมาย ไม่ถูกบังคับให้ทำงานใดงานหนึ่ง'],['การแสวงหากำไร','💰','กำไรคือรายได้หักต้นทุน เป็นแรงจูงใจให้ผู้ประกอบการลงทุนและพัฒนาสินค้า'],['การแข่งขันทางเศรษฐกิจ','🏁','ผู้ผลิตแข่งกันด้านราคาและคุณภาพ ช่วยให้ผู้บริโภคได้สินค้าดีราคาเหมาะสมและเกิดนวัตกรรม'],['กลไกราคา','⚖️','ราคาทำหน้าที่ส่งสัญญาณในตลาด ราคาสูงจูงใจให้ผลิตมากขึ้น ราคาต่ำชวนให้ซื้อมากขึ้น'],['อุปสงค์และอุปทาน','📉','อุปสงค์มากกว่าอุปทาน ราคาสูงขึ้น อุปทานมากกว่าอุปสงค์ ราคาลดลง จนถึงราคาดุลยภาพ'],['บทบาทภาคเอกชน','🏭','ตัดสินใจผลิต ลงทุน จ้างงาน และสร้างสินค้าบริการตามความต้องการของตลาด'],['บทบาทภาครัฐ','🏛️','ออกกฎหมาย ป้องกันการผูกขาด คุ้มครองผู้บริโภค จัดบริการสาธารณะ และแก้ไขความล้มเหลวของตลาด'],['ข้อดีและข้อจำกัด','🔍','ข้อดี: ประสิทธิภาพ นวัตกรรม ทางเลือกหลากหลาย ข้อจำกัด: ความเหลื่อมล้ำ การผูกขาด ผลกระทบสิ่งแวดล้อม และวิกฤตเศรษฐกิจ']];
+const MS=[['สร้างธุรกิจแรก',()=>S.biz.length>=1],['ซื้อขายสินค้า 1 ครั้ง',()=>S.tr>=1],['ลงทุน 1 ครั้ง',()=>S.iv>=1],['อ่านบทเรียน 3 หัวข้อ',()=>Object.keys(S.rd).length>=3],['ตัดสินใจแก้วิกฤต 1 ครั้ง',()=>S.cn>=1],['มีธุรกิจ 3 ประเภท',()=>types()>=3]];
+const Z=[['ศูนย์ราชการ',-18,-8,0xcfd8dc,[2.5,4,2.5],0xffffff],['ย่านธุรกิจ',-6,-8,0x90caf9,[6,8,5],0x2f5bd8],['ย่านการเงิน',6,-8,0xffe082,[4,5,4],0xf5b800],['เขตอุตสาหกรรม',18,-8,0xbcaaa4,[2.5,3,2],0xe67e22],['เขตที่อยู่อาศัย',-14,8,0xf8bbd0,[1.5,1.8,1.5],0xff8a80],['ตลาดกลาง',0,8,0xffcc80,[2,2.6,2],0xff9800],['เขตเกษตรกรรม',14,8,0xa5d6a7,[1.2,1.6,1.2],0xc0392b]];
+const PL=[];Z.forEach(z=>[-2.6,2.6].forEach(dx=>PL.push({x:z[1]+dx,z:z[2]<0?-5.2:5.2})));
+// ---------- STATE ----------
+let S,mode='intro',paused=false,sel=null;
+const newS=()=>({name:'',ch:0,sex:0,job:0,df:1,coins:10000,inc:0,exp:0,prof:0,tinc:0,xp:0,day:1,biz:[],g:G0.map(g=>({p:g[2],d:100,s:100,h:[g[2]],own:0,avg:0})),iv:0,ivs:[],tr:0,mk:0,rd:{},md:{},cn:0,cok:0,eth:50,sat:70,mod:{d:1,c:1,l:0},nws:[],cu:[],ended:false});
+const types=()=>new Set(S.biz.map(b=>b.t)).size;
+function save(){try{localStorage.setItem('ct3d',JSON.stringify(S))}catch(e){}}
+function loadS(){try{return JSON.parse(localStorage.getItem('ct3d'))}catch(e){return null}}
+// ---------- AUDIO ----------
+let AC;function sfx(a,b,d=.15,t='sine'){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;o.type=t;o.frequency.setValueAtTime(a,n);o.frequency.linearRampToValueAtTime(b,n+d);g.gain.setValueAtTime(.1,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(n+d)}catch(e){}}
+const seq=a=>a.forEach((f,i)=>setTimeout(()=>sfx(f,f,.2),i*130));
+const SF={click:()=>sfx(600,800,.08),buy:()=>sfx(400,300,.15,'square'),coin:()=>{sfx(900,1400,.12);setTimeout(()=>sfx(1400,1800,.15),90)},win:()=>seq([523,659,784,1047]),alarm:()=>sfx(300,180,.5,'sawtooth'),start:()=>seq([262,392,523])};
+document.addEventListener('click',e=>{if(e.target.closest('button'))SF.click()});
+// ---------- UI HELPERS ----------
+function toast(t){const d=document.createElement('div');d.textContent=t;$('toast').appendChild(d);setTimeout(()=>d.remove(),3000)}
+function M(h){$('mb').innerHTML='<button class="x" onclick="cm()">✕</button>'+h;$('modal').style.display='flex'}
+function cm(){$('modal').style.display='none';paused=false}
+function spend(x){if(x>S.coins){toast('⚠️ เงินทุนไม่พอ (ต้องการ '+fmt(x)+')');return false}S.coins-=x;return true}
+function lvl(){let l=0;LX.forEach((x,i)=>{if(S.xp>=x)l=i});return l}
+function addXP(n){const o=lvl();S.xp+=n;if(lvl()>o){toast('🎉 เลื่อนระดับ: '+LV[lvl()]);cheer();SF.win()}}
+function ui(){if(!S)return;$('top').innerHTML=`<span>💰 ${fmt(S.coins)}</span><span>📈 รายได้ ${fmt(S.inc)}/วัน</span><span>📉 จ่าย ${fmt(S.exp)}</span><span>💵 กำไร ${fmt(S.prof)}</span><span>⭐ ${S.xp} XP</span><span>🏅 Lv${lvl()+1} ${LV[lvl()]}</span><span>📅 วัน ${S.day}</span><span>😊 ${Math.round(S.sat)}%</span>`;
+$('rn').textContent=S.name+' • '+B[S.job][0];$('rl').innerHTML='ธุรกิจ '+S.biz.length+' แห่ง';const m=MS.find((x,i)=>!S.md[i]);$('rm').textContent=m?m[0]:'ครบทุกภารกิจแล้ว!';$('rw').textContent=S.nws[0]||'ยังไม่มีข่าว'}
+function checkM(){MS.forEach((m,i)=>{if(!S.md[i]&&m[1]()){S.md[i]=1;S.coins+=300;addXP(60);toast('✅ ภารกิจสำเร็จ: '+m[0]+' (+300 COINS)');SF.win();cheer()}});ui();save()}
+// ---------- INFO SCREENS ----------
+function howTo(){M('<h2>วิธีเล่น</h2><ol><li>กดที่ดินว่างสีเขียวในเมือง (หรือปุ่ม 🏗️) เพื่อสร้างธุรกิจ</li><li>ซื้อ-ขายสินค้าในตลาด ราคาเปลี่ยนตามอุปสงค์-อุปทานและข่าว</li><li>ลงทุนเพื่อรับผลตอบแทน แต่ต้องรับความเสี่ยง</li><li>เมื่อเกิดวิกฤต เลือกแนวทางแก้ไขให้เหมาะสม</li><li>อ่าน Knowledge Zone เพื่อเก็บคะแนนความรู้</li><li>ทำเงิน ≥ 20,000, มีธุรกิจ 3 ประเภท, กำไร, ประชาชนพอใจ แล้วกด 🏁</li></ol><p>ลาก = หมุนกล้อง • เลื่อนล้อ/บีบนิ้ว = ซูม</p>')}
+function objs(){M('<h2>จุดประสงค์การเรียนรู้</h2><ul><li>อธิบายลักษณะของระบบเศรษฐกิจแบบทุนนิยม</li><li>อธิบายกลไกราคา อุปสงค์ และอุปทาน</li><li>วิเคราะห์บทบาทภาคเอกชนและภาครัฐ</li><li>ประเมินข้อดี ข้อจำกัด และตัดสินใจอย่างมีจริยธรรมทางธุรกิจ</li></ul>')}
+function about(){M('<h2>CAPITALISM TYCOON 3D</h2><p>เกมการศึกษาสังคมศึกษา สาระเศรษฐศาสตร์ ระดับมัธยมศึกษาตอนปลาย เรื่อง "ระบบเศรษฐกิจแบบทุนนิยม" สร้างด้วย HTML5 + Three.js</p>')}
+// ---------- PANELS ----------
+function est(t,up){const x=B[t],u=x[7]+up*5,rev=u*x[6],c=u*x[3]+x[4]*x[5];return{u,rev,c,p:rev-c}}
+const cost=t=>Math.round(B[t][2]*(S.job==t?.9:1));
+function bizPanel(){paused=true;const note=sel!=null?`<p>📍 จะสร้างที่ที่ดิน #${sel+1}</p>`:'';M('<h2>🏗️ สร้างธุรกิจ</h2>'+note+'<div class="grid">'+B.map((x,t)=>{const e=est(t,0);return`<div class="card"><b>${x[1]} ${x[0]}</b><br>เงินลงทุน ${fmt(cost(t))}<br>วัตถุดิบ ${x[3]}/หน่วย • ผลิต ${x[7]}/วัน<br>แรงงาน ${x[4]} คน × ${x[5]}<br>ราคาขาย ${x[6]}<br>รายรับ ~${fmt(e.rev)} • รายจ่าย ~${fmt(e.c)}<br><b>กำไรสุทธิ ~${fmt(e.p)}/วัน</b><br><button class="b g" onclick="build(${t})">สร้าง</button></div>`}).join('')+'</div>')}
+function build(t){let p=sel;if(p==null)p=PL.findIndex((_,i)=>!S.biz.find(b=>b.p==i));if(p<0||S.biz.find(b=>b.p==p)){toast('ไม่มีที่ดินว่าง');return}if(!spend(cost(t)))return;const b={t,p,up:0};S.biz.push(b);mk3(b);sel=null;SF.buy();coinFx(PL[p].x,PL[p].z);addXP(30);toast('🏗️ สร้าง'+B[t][0]+'สำเร็จ');cm();checkM()}
+function manage(p){const b=S.biz.find(x=>x.p==p),e=est(b.t,b.up),uc=Math.round(B[b.t][2]*.6);paused=true;M(`<h2>${B[b.t][1]} ${B[b.t][0]}</h2><p>ผลิต ${e.u}/วัน • รายรับ ~${fmt(e.rev)} • รายจ่าย ~${fmt(e.c)} • กำไร ~${fmt(e.p)}/วัน</p><button class="b g" onclick="upg(${p})">⬆ ขยายกำลังผลิต +5 (${fmt(uc)})</button><button class="b" onclick="dem(${p})">🗑 ขายกิจการ (รับ ${fmt(B[b.t][2]*.5)})</button>`)}
+function upg(p){const b=S.biz.find(x=>x.p==p);if(!spend(Math.round(B[b.t][2]*.6)))return;b.up++;SF.buy();addXP(10);toast('ขยายกำลังผลิตแล้ว');manage(p);ui();save()}
+function dem(p){const i=S.biz.findIndex(x=>x.p==p),b=S.biz[i];S.coins+=B[b.t][2]*.5;S.biz.splice(i,1);rm3(p);SF.coin();cm();ui();save()}
+function price(g){return Math.max(1,Math.round(G0[S.g.indexOf(g)][2]*(1+(g.d-g.s)/(g.d+g.s)*.8)))}
+function spark(h){const m=Math.min(...h),x=Math.max(...h)||1,r=Math.max(1,x-m);return`<svg width="80" height="24"><polyline fill="none" stroke="#1e4fd8" stroke-width="2" points="${h.map((v,i)=>(i*80/Math.max(1,h.length-1)).toFixed(0)+','+(22-(v-m)/r*20).toFixed(0)).join(' ')}"/></svg>`}
+function market(tab){paused=true;const rows=S.g.map((g,i)=>{const p=g.p,gap=g.d-g.s,ar=gap>8?'🔺':gap<-8?'🔻':'▬';return`<tr><td>${G0[i][1]} ${G0[i][0]}</td><td><b>${p}</b> ${ar}</td><td>ต้องการ ${Math.round(g.d)}<div class="pb"><i style="width:${cl(g.d/2,0,100)}%"></i></div>เสนอขาย ${Math.round(g.s)}<div class="pb"><i style="background:#ff8a00;width:${cl(g.s/2,0,100)}%"></i></div></td><td>${spark(g.h)}</td><td>มี ${g.own}${g.own?'<br><small>ทุนเฉลี่ย '+Math.round(g.avg)+'</small>':''}</td><td>${tab=='sell'?`<input id="ask${i}" type="number" value="${p}" style="width:60px"><br><button class="b" onclick="sell(${i})">ขาย 10</button>`:`<button class="b g" onclick="buy(${i})">ซื้อ 10</button>`}</td></tr>`}).join('');
+M(`<h2>🛒 ตลาดกลาง ${tab=='buy'?'(ซื้อ)':tab=='sell'?'(ขาย - กำหนดราคาเอง)':'(ข้อมูลตลาด)'}</h2><div style="overflow-x:auto"><table><tr><th>สินค้า</th><th>ราคา</th><th>อุปสงค์/อุปทาน</th><th>กราฟ</th><th>สต็อก</th><th></th></tr>${rows}</table></div><p><small>ราคา = ราคาฐาน × (1 + (ต้องการ − เสนอขาย)/รวม × 0.8) • ตั้งราคาขายเกินตลาดเกิน 10% จะไม่มีผู้ซื้อ</small></p><button class="b bl" onclick="market('buy')">ซื้อ</button><button class="b bl" onclick="market('sell')">ขาย</button>`)}
+function buy(i){const g=S.g[i],p=g.p,c=p*10;if(!spend(c))return;g.avg=(g.avg*g.own+c)/(g.own+10);g.own+=10;g.d+=4;g.s-=4;S.tr++;SF.buy();addXP(5);market('buy');checkM()}
+function sell(i){const g=S.g[i],p=g.p,a=+$('ask'+i).value||p;if(g.own<10){toast('สต็อกไม่พอ');return}if(a>p*1.1){toast('📉 ตั้งราคาสูงกว่าตลาดเกินไป ไม่มีผู้ซื้อ (อุปสงค์ไม่พอ)');return}const rev=a*10,pf=rev-g.avg*10;g.own-=10;S.coins+=rev;g.s+=5;g.d-=2;S.tr++;if(pf>0)S.mk++;SF.coin();toast((pf>=0?'กำไร +':'ขาดทุน ')+fmt(pf));addXP(5);market('sell');checkM()}
+function invest(){paused=true;M('<h2>📈 ศูนย์การลงทุน</h2><div class="grid">'+INV.map((v,i)=>`<div class="card"><b>${v[0]}</b><br>เงินลงทุน ${fmt(v[1])}<br>ผลตอบแทน +${v[2]*100}%<br>ความเสี่ยง ${v[3]*100}%<br>คืนทุน ${v[4]} วัน<br><button class="b g" onclick="doInv(${i})">ลงทุน</button></div>`).join('')+'</div><h3>กำลังลงทุน</h3>'+(S.ivs.map(v=>`<div>${INV[v.i][0]} - เหลือ ${v.d} วัน</div>`).join('')||'ยังไม่มี'))}
+function doInv(i){if(!spend(INV[i][1]))return;S.ivs.push({i,d:INV[i][4]});S.iv++;SF.buy();addXP(20);toast('ลงทุนแล้ว รอผลตอบแทน');invest();checkM()}
+function know(){paused=true;M('<h2>📚 Knowledge Zone ('+Object.keys(S.rd).length+'/10)</h2><div class="grid">'+K.map((k,i)=>`<div class="card" onclick="read(${i})" style="cursor:pointer">${k[1]} <b>${i+1}. ${k[0]}</b> ${S.rd[i]?'✅':''}</div>`).join('')+'</div>')}
+function read(i){const k=K[i];if(!S.rd[i]){S.rd[i]=1;addXP(20);toast('+25 คะแนนความรู้')}M(`<h2>${i+1}. ${k[0]}</h2><div class="cube">${k[1]}</div><p style="font-size:17px">${k[2]}</p><button class="b bl" onclick="know()">กลับ</button>`);checkM()}
+function news(){paused=true;M('<h2>📰 ข่าวเศรษฐกิจ</h2>'+(S.nws.map(n=>'<p>'+n+'</p>').join('')||'ยังไม่มีข่าว'))}
+function missions(){paused=true;M('<h2>🎯 ภารกิจ</h2>'+MS.map((m,i)=>`<p>${S.md[i]?'✅':'⬜'} ${m[0]}</p>`).join(''))}
+function settings(){paused=true;M('<h2>⚙ ตั้งค่า</h2><button class="b g" onclick="save();toast(\'บันทึกแล้ว\')">💾 บันทึก</button><button class="b" onclick="if(confirm(\'รีเซ็ตเกม?\')){try{localStorage.removeItem(\'ct3d\')}catch(e){}location.reload()}">♻ Reset Game</button><button class="b bl" onclick="finish()">จบเกมและดูผล</button>')}
+// ---------- FINAL & RESULT ----------
+function finalCh(){paused=true;const c=[['เงินทุน ≥ 20,000',S.coins>=20000],['ธุรกิจ ≥ 3 ประเภท',types()>=3],['มีกำไรจากธุรกิจ',S.prof>0],['ความพึงพอใจ ≥ 60%',S.sat>=60],['ตัดสินใจแก้วิกฤตแล้ว',S.cn>=1]],ok=c.every(x=>x[1]);M('<h2>🏁 ภารกิจสุดท้าย</h2>'+c.map(x=>`<p>${x[1]?'✅':'❌'} ${x[0]}</p>`).join('')+(ok?'<button class="b g" onclick="finish()">ส่งภารกิจ!</button>':'<p>ยังไม่ผ่านเงื่อนไข ลองทำต่ออีกนิด</p>'))}
+function finish(){const sc={k:Math.min(250,Object.keys(S.rd).length*25),a:Math.min(250,types()*40+S.biz.length*15+(S.coins>=20000?60:0)+Math.min(40,S.day)),m:Math.min(200,S.mk*20+S.tr*3),c:Math.min(200,S.cok*50),e:cl(S.eth,0,100)},t=sc.k+sc.a+sc.m+sc.c+sc.e,md=t>=850?['💎','DIAMOND']:t>=650?['🥇','GOLD']:t>=400?['🥈','SILVER']:['🥉','BRONZE'];S.ended=true;SF.win();cheer();
+M(`<h2>🏆 ผลการเล่น</h2><div class="cube">🏆</div><h2 style="text-align:center">${md[0]} ${md[1]} TYCOON</h2><table><tr><td>เงินทุนคงเหลือ</td><td>${fmt(S.coins)}</td></tr><tr><td>รายได้รวม</td><td>${fmt(S.tinc)}</td></tr><tr><td>กำไรสุทธิ/วัน</td><td>${fmt(S.prof)}</td></tr><tr><td>จำนวนธุรกิจ</td><td>${S.biz.length}</td></tr><tr><td>ความรู้เศรษฐศาสตร์</td><td>${sc.k}/250</td></tr><tr><td>การบริหารธุรกิจ</td><td>${sc.a}/250</td></tr><tr><td>วิเคราะห์ตลาด</td><td>${sc.m}/200</td></tr><tr><td>แก้ไขวิกฤต</td><td>${sc.c}/200</td></tr><tr><td>จริยธรรมธุรกิจ</td><td>${sc.e}/100</td></tr><tr><th>รวม</th><th>${t}/1000</th></tr></table><button class="b" onclick="cm()">เล่นต่อ</button><button class="b bl" onclick="try{localStorage.removeItem('ct3d')}catch(e){};location.reload()">เริ่มใหม่</button>`)}
+// ---------- SIMULATION ----------
+function tick(){S.day++;let r=0,c=0,w=0;S.biz.forEach(b=>{const x=B[b.t],u=x[7]+b.up*5;r+=u*x[6]*(.85+R()*.3)*S.mod.d*(1+(S.sat-70)/400);c+=u*x[3]*S.mod.c+x[4]*x[5];w+=x[4];const p=PL[b.p];coinFx(p.x,p.z)});
+S.inc=r;S.exp=c;S.prof=r-c;S.tinc+=r;S.coins+=r-c;if(S.coins<0){S.coins=0;S.sat-=3;toast('⚠️ เงินทุนไม่พอจ่ายค่าใช้จ่าย!')}
+S.sat=cl(S.sat+(w>0?.5:-.5)+(S.prof<0?-1:0),0,100);if(S.mod.l>0&&--S.mod.l==0)S.mod.d=S.mod.c=1;
+S.g.forEach(g=>{g.d+=(100-g.d)*.1+(R()-.5)*14;g.s+=(100-g.s)*.1+(R()-.5)*14;g.d=cl(g.d,30,190);g.s=cl(g.s,30,190);g.p=price(g);g.h.push(g.p);if(g.h.length>20)g.h.shift()});
+S.ivs=S.ivs.filter(v=>{if(--v.d>0)return 1;const q=INV[v.i];if(R()<q[3]){S.coins+=q[1]*.4;toast('📉 การลงทุนล้มเหลว ได้คืน 40%')}else{S.coins+=q[1]*(1+q[2]);toast('📈 การลงทุนสำเร็จ +'+fmt(q[1]*q[2]));SF.coin()}return 0});
+if(S.day%4==0){const n=N[Math.floor(R()*N.length)];S.nws.unshift('วัน '+S.day+': '+n[0]+' — '+n[4]);S.nws=S.nws.slice(0,8);S.g.forEach((g,i)=>{if(n[1]<0||n[1]==i){g.d+=n[2];g.s+=n[3]}});S.mod.l=3;if(n[2]>0)S.mod.d=1+n[2]/250;if(n[3]<0)S.mod.c=1-n[3]/250;toast('📰 '+n[0])}
+if(S.day>=5&&S.day%7==5)crisis();ui();checkM();save()}
+function crisis(){const un=C.map((_,i)=>i).filter(i=>!S.cu.includes(i)),i=un.length?un[Math.floor(R()*un.length)]:Math.floor(R()*C.length);S.cu.push(i);const c=C[i];paused=true;SF.alarm();M(`<h2 style="color:#e11d48">⚠️ วิกฤต: ${c[0]}</h2><p>${c[1]}</p><p>เลือกแนวทางแก้ไข:</p>`+c[2].map((o,j)=>`<button class="b" style="display:block;width:100%;text-align:left" onclick="solve(${i},${j})">${o[0]}<br><small>เงิน ${o[1]>=0?'+':''}${o[1]} • พึงพอใจ ${o[2]>=0?'+':''}${o[2]}</small></button>`).join(''));$('mb').firstChild.style.display='none'}
+function solve(i,j){const o=C[i][2][j],m=[.7,1,1.4][S.df],dc=o[1]<0?o[1]*m:o[1];if(dc<0&&-dc>S.coins){toast('⚠️ เงินทุนไม่พอสำหรับทางเลือกนี้');return}S.coins+=dc;S.sat=cl(S.sat+o[2],0,100);S.eth=cl(S.eth+o[3]*(o[4]?4:1),0,100);S.cn++;if(o[4]){S.cok++;addXP(50);cheer();SF.win()}S.mod={d:1,c:1,l:0};
+paused=true;M(`<h2>${o[4]?'✅ การตัดสินใจเหมาะสม':'❌ การตัดสินใจไม่เหมาะสม'}</h2><p>${o[5]}</p><p>เงินทุน ${dc>=0?'+':''}${fmt(dc)} • ความพึงพอใจ ${o[2]>=0?'+':''}${o[2]} • จริยธรรม ${o[3]>=0?'+':''}${o[3]}</p><button class="b" onclick="cm()">เข้าใจแล้ว</button>`);ui();checkM()}
+// ---------- 3D WORLD ----------
+let renderer,scene,camera,hero,raycaster,mouse,bl={},plotM=[],walkers=[],cars=[],coinsF=[],hov=null,th=.8,ph=.95,rad=75,gth=.8,gph=.95,grad=48,tg,gtg,heroCheer=0,clock;
+function chibi(shirt,hair,sc=1){const g=new T.Group(),add=(geo,c,x,y,z)=>{const m=new T.Mesh(geo,new T.MeshStandardMaterial({color:c,roughness:.6}));m.position.set(x,y,z);m.castShadow=true;g.add(m);return m};
+g.shirt=add(new T.CylinderGeometry(.35,.4,.7,12),shirt,0,.75,0);add(new T.SphereGeometry(.55,16,12),0xffd7b5,0,1.5,0);g.hair=add(new T.SphereGeometry(.58,16,8,0,6.3,0,1.3),hair,0,1.55,-.02);g.long=add(new T.BoxGeometry(.9,.9,.3),hair,0,1.3,-.4);g.long.visible=false;
+add(new T.SphereGeometry(.09,8,8),0x111111,-.2,1.5,.5);add(new T.SphereGeometry(.09,8,8),0x111111,.2,1.5,.5);add(new T.BoxGeometry(.5,.12,.2),0xffffff,0,1.0,.3).visible=false;
+g.lL=add(new T.BoxGeometry(.2,.4,.2),0x333344,-.15,.2,0);g.lR=add(new T.BoxGeometry(.2,.4,.2),0x333344,.15,.2,0);g.aL=add(new T.BoxGeometry(.15,.5,.15),shirt,-.5,.85,0);g.aR=add(new T.BoxGeometry(.15,.5,.15),shirt,.5,.85,0);g.scale.setScalar(sc);return g}
+function label(t,s=1,bg='rgba(255,255,255,.92)'){const c=document.createElement('canvas');c.width=256;c.height=64;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,256,64);x.fillStyle='#1e4fd8';x.font='bold 30px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(t,128,34,240);const sp=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c)}));sp.scale.set(5*s,1.25*s,1);return sp}
+function box(w,h,d,c,x,y,z,cast=true){const m=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshStandardMaterial({color:c,roughness:.7}));m.position.set(x,y,z);m.castShadow=cast;m.receiveShadow=true;scene.add(m);return m}
+function init3D(){renderer=new T.WebGLRenderer({canvas:$('c'),antialias:true});renderer.setPixelRatio(navigator.hardwareConcurrency<=4?1:Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;scene=new T.Scene();scene.background=new T.Color(0x8fd3ff);scene.fog=new T.Fog(0x8fd3ff,70,150);camera=new T.PerspectiveCamera(45,1,.1,300);tg=new T.Vector3();gtg=new T.Vector3();raycaster=new T.Raycaster();mouse=new T.Vector2();clock=new T.Clock();
+scene.add(new T.HemisphereLight(0xffffff,0x6aa84f,.75));const sun=new T.DirectionalLight(0xfff1c9,.9);sun.position.set(25,40,20);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-45,right:45,top:45,bottom:-45,far:120});scene.add(sun);
+const gr=box(90,.4,60,0x7ed36f,0,-.2,0,false);gr.receiveShadow=true;box(80,.1,3,0x444b55,0,.05,0,false);for(let x=-38;x<38;x+=4)box(2,.02,.2,0xffffff,x,.11,0,false);
+Z.forEach((z,zi)=>{box(10,.15,9,z[3],z[1],.08,z[2],false);const lb=label(z[0],.9);lb.position.set(z[1],z[4][1]+2.5,z[2]+(z[2]<0?-3.2:3.2));scene.add(lb);[-3,0,3].forEach((dx,k)=>{const h=z[4][k%3]*(.8+k*.2);box(2.4,h,2.4,z[5],z[1]+dx,h/2,z[2]+(z[2]<0?-3.4:3.4));if(zi==3)box(.6,h+1.5,.6,0x555555,z[1]+dx+.7,(h+1.5)/2,z[2]-3.4)});
+if(zi==6)box(8,.1,2.5,0x8bc34a,z[1],.2,z[2]+(z[2]<0?-1:1)*0,false);box(2,.1,3.2,0x444b55,z[1],.07,z[2]<0?-1.7:1.7,false)});
+PL.forEach((p,i)=>{const m=new T.Mesh(new T.BoxGeometry(3,.2,3),new T.MeshStandardMaterial({color:0x34d399,transparent:true,opacity:.7}));m.position.set(p.x,.15,p.z);m.userData.pl=i;scene.add(m);plotM[i]=m});
+for(let i=0;i<40;i++){const x=(R()-.5)*80,z=(R()<.5?-1:1)*(15+R()*12);const t=new T.Mesh(new T.ConeGeometry(.9,2.4,8),new T.MeshStandardMaterial({color:0x2e9e4f}));t.position.set(x,1.6,z);t.castShadow=true;scene.add(t);box(.3,.5,.3,0x7a4b1e,x,.25,z,false)}
+for(let i=0;i<7;i++){const cr=new T.Group(),c=[0xe74c3c,0xf1c40f,0x3498db,0xffffff,0x9b59b6,0x2ecc71,0xff7f50][i];const b=new T.Mesh(new T.BoxGeometry(2,.7,1),new T.MeshStandardMaterial({color:c}));b.position.y=.5;b.castShadow=true;const t=new T.Mesh(new T.BoxGeometry(1,.5,.9),new T.MeshStandardMaterial({color:0xcfe8ff}));t.position.set(-.1,1,0);cr.add(b,t);cr.position.set(-35+i*10,0,i%2?.8:-.8);cr.userData.v=(i%2?1:-1)*(5+R()*3);cr.rotation.y=i%2?0:Math.PI;scene.add(cr);cars.push(cr)}
+for(let i=0;i<14;i++){const w=chibi(CH[i%4][1],0x222222,.8);w.position.set(-35+R()*70,0,i%2?2.3:-2.3);w.userData.v=(i%2?1:-1)*(1.2+R());w.rotation.y=w.userData.v>0?Math.PI/2:-Math.PI/2;scene.add(w);walkers.push(w)}
+Z.forEach((z,i)=>{const w=chibi([0x555555,0x2f5bd8,0x222222,0xe67e22,0xffffff,0xff9800,0x558b2f][i],0x3a2a1a,1);w.position.set(z[1]+4.2,0,z[2]<0?-2.8:2.8);w.rotation.y=z[2]<0?0:Math.PI;scene.add(w);walkers.push(w)});
+hero=chibi(CH[0][1],CH[0][2],1.4);hero.position.set(0,0,3);scene.add(hero);resize();addEventListener('resize',resize);inputs()}
+function resize(){if(!renderer)return;renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
+function heroLook(){if(!hero)return;const c=CH[S.ch];hero.shirt.material.color.set(c[1]);hero.aL.material.color.set(c[1]);hero.aR.material.color.set(c[1]);hero.hair.material.color.set(c[2]);hero.long.material.color.set(c[2]);hero.long.visible=S.sex==1}
+function mk3(b){if(!T)return;const x=B[b.t],p=PL[b.p],g=new T.Group();g.position.set(p.x,0,p.z);g.userData.t=0;const h=2.2+b.t*.5,mat=c=>new T.MeshStandardMaterial({color:c,roughness:.6}),bd=new T.Mesh(new T.BoxGeometry(2.4,h,2.4),mat(x[8]));bd.position.y=h/2;bd.castShadow=true;bd.userData.pl=b.p;const rf=new T.Mesh(new T.BoxGeometry(2.6,.3,2.6),mat(0xffffff));rf.position.y=h+.15;g.add(bd,rf);if(b.t==0){const ch=new T.Mesh(new T.CylinderGeometry(.3,.3,1.6,8),mat(0x666666));ch.position.set(.7,h+1,.7);g.add(ch)}
+const e=label(x[1]+' '+x[0],.55);e.position.y=h+1.4;g.add(e);g.scale.y=.01;scene.add(g);bl[b.p]=g;plotM[b.p].visible=false}
+function rm3(p){if(bl[p]){scene.remove(bl[p]);delete bl[p]}if(plotM[p])plotM[p].visible=true}
+let cG,cM;function coinFx(x,z){if(!T)return;cG=cG||new T.CylinderGeometry(.35,.35,.08,16);cM=cM||new T.MeshStandardMaterial({color:0xffc400,metalness:.6,roughness:.3});const m=new T.Mesh(cG,cM);m.rotation.x=Math.PI/2;m.position.set(x,2,z);scene.add(m);coinsF.push({m,t:0})}
+function cheer(){heroCheer=2}
+function zoom(d){grad=cl(grad+d,14,75)}function rot(){gth+=Math.PI/2}
+function inputs(){const cv=$('c'),pt={};let moved=0,pd=0;cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pt[e.pointerId]=[e.clientX,e.clientY];moved=0;pd=0});
+cv.addEventListener('pointermove',e=>{const o=pt[e.pointerId];if(!o){hover(e);return}const ids=Object.keys(pt);if(ids.length==2){const q=pt[ids.find(i=>i!=e.pointerId)],d0=Math.hypot(o[0]-q[0],o[1]-q[1]),d1=Math.hypot(e.clientX-q[0],e.clientY-q[1]);grad=cl(grad*d0/Math.max(1,d1),14,75)}else{gth-=(e.clientX-o[0])*.006;gph=cl(gph-(e.clientY-o[1])*.004,.3,1.4)}moved+=Math.abs(e.clientX-o[0])+Math.abs(e.clientY-o[1]);pt[e.pointerId]=[e.clientX,e.clientY]});
+cv.addEventListener('pointerup',e=>{delete pt[e.pointerId];if(moved<8&&mode=='play'){const h=ray(e);if(h!=null){const b=S.biz.find(x=>x.p==h);if(b)manage(h);else{sel=h;bizPanel()}}}});cv.addEventListener('wheel',e=>{e.preventDefault();grad=cl(grad+e.deltaY*.03,14,75)},{passive:false})}
+function ray(e){mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);raycaster.setFromCamera(mouse,camera);const objs=[];plotM.forEach(m=>m.visible&&objs.push(m));Object.values(bl).forEach(g=>objs.push(g.children[0]));const h=raycaster.intersectObjects(objs)[0];return h?h.object:null}
+function hover(e){if(mode!='play')return;if(hov){hov.material.emissive?.set(0);hov=null}const o=ray(e);$('c').style.cursor=o?'pointer':'default';if(o){hov=o;o.material.emissive?.set(0x665500)}}
+const _ray=ray;ray=function(e){const o=_ray(e);return e.type=='pointerup'?(o?o.userData.pl:null):o};
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
+if(mode=='intro'){gth+=dt*.12;grad=Math.max(48,grad-dt*2);gph=.9}if(mode=='setup'){gtg.set(-1.2,1.3,3);gph=1.35;grad=7}else if(mode!='setup')gtg.set(0,0,0);
+th+=(gth-th)*.06;ph+=(gph-ph)*.06;rad+=(grad-rad)*.06;tg.lerp(gtg,.06);camera.position.set(tg.x+rad*Math.sin(ph)*Math.sin(th),tg.y+rad*Math.cos(ph),tg.z+rad*Math.sin(ph)*Math.cos(th));camera.lookAt(tg);
+cars.forEach(c=>{c.position.x+=c.userData.v*dt;if(c.position.x>40)c.position.x=-40;if(c.position.x<-40)c.position.x=40});
+walkers.forEach((w,i)=>{if(w.userData.v){w.position.x+=w.userData.v*dt;if(Math.abs(w.position.x)>40)w.position.x*=-.98}const s=Math.sin(t*6+i);w.lL.rotation.x=s*.6;w.lR.rotation.x=-s*.6;w.position.y=Math.abs(s)*.05;if(!w.userData.v)w.rotation.y+=Math.sin(t+i)*.002});
+if(hero){hero.lL.rotation.x=hero.lR.rotation.x=0;if(heroCheer>0){heroCheer-=dt;hero.position.y=Math.abs(Math.sin(t*10))*.6;hero.aL.rotation.z=hero.aR.rotation.z=0;hero.aL.rotation.x=hero.aR.rotation.x=Math.PI;}else{hero.position.y=Math.sin(t*2)*.05;hero.aL.rotation.x=hero.aR.rotation.x=0;hero.aR.rotation.z=Math.sin(t*5)*.7-.7}
+if(mode=='setup')hero.rotation.y=Math.PI*0+0;else hero.rotation.y=Math.sin(t*.5)*.3}
+Object.values(bl).forEach(g=>{if(g.scale.y<1)g.scale.y=Math.min(1,g.scale.y+dt*1.5)});
+for(let i=coinsF.length-1;i>=0;i--){const c=coinsF[i];c.t+=dt;c.m.position.y+=dt*2.5;c.m.rotation.z+=dt*8;if(c.t>2){scene.remove(c.m);coinsF.splice(i,1)}}
+if(mode=='intro'&&R()<.04){const p=PL[Math.floor(R()*14)];coinFx(p.x,p.z)}
+renderer.render(scene,camera)}
+// ---------- FLOW ----------
+function show(id){['intro','setup'].forEach(i=>$(i).style.display=i==id?'flex':'none');$('hud').style.display=id=='hud'?'block':'none'}
+function newGame(){SF.start();mode='setup';gth=0;show('setup');S=newS();heroLook()}
+function confirmSetup(){S.name=$('pn').value.trim()||'CEO';S.sex=+$('pg').value;S.job=+$('pj').value;S.df=+$('pd').value;heroLook();startPlay();toast('เริ่มต้นด้วย 10,000 COINS!');save()}
+function contGame(){const s=loadS();if(!s)return;S=s;heroLook();Object.keys(bl).forEach(rm3);S.biz.forEach(mk3);startPlay()}
+function startPlay(){mode='play';show('hud');gth=.8;gph=.95;grad=40;cheer();ui();checkM()}
+let lastT=0;setInterval(()=>{if(mode=='play'&&!paused&&!S.ended&&!document.hidden)tick()},7000);
+async function boot(){const st=async(p,t)=>{$('lb').style.width=p+'%';$('lt').textContent=t;await new Promise(r=>setTimeout(r,60))};
+await st(15,'กำลังเตรียมเมือง CAPITAL CITY…');
+$('chs').innerHTML=CH.map((c,i)=>`<button class="b ${i?'':'on'}" onclick="S.ch=${i};heroLook();[...$('chs').children].forEach((e,j)=>e.classList.toggle('on',j==${i}))">${c[0]}</button>`).join('');$('pj').innerHTML=B.map((b,i)=>`<option value="${i}">${b[1]} ${b[0]}</option>`).join('');
+$('pg').onchange=()=>{S.sex=+$('pg').value;heroLook()};
+S=newS();
+if(T){try{await st(40,'กำลังสร้างโมเดล 3D…');init3D();await st(80,'กำลังวางอาคารและตัวละคร…');heroLook();animate()}catch(e){console.error(e);$('lt').textContent='โหมด 3D ไม่พร้อม ใช้โหมดเมนูแทน'}}
+else{$('lt').textContent='โหลด Three.js ไม่สำเร็จ — เล่นแบบเมนูได้ (ไม่มีภาพ 3D)';await new Promise(r=>setTimeout(r,1200))}
+if(!T){window.mk3=()=>{};window.rm3=()=>{};window.coinFx=()=>{};window.cheer=()=>{}}
+if(loadS())$('cont').style.display='block';
+await st(100,'พร้อมแล้ว!');$('load').style.display='none';show('intro');
+}
+boot();
+</script></body></html>
